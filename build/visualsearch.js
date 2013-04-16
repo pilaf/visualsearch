@@ -1170,7 +1170,15 @@ VS.ui.SearchInput = Backbone.View.extend({
   addTextFacetRemainder : function(facetValue) {
     var boxValue = this.box.val();
     var lastWord = boxValue.match(/\b(\w+)$/);
-    
+
+    var categories = this.app.options.callbacks.facetMatches(function(facets) {
+      return _.map(facets, function(facet) {
+        return facet.label || facet;
+      });
+    });
+    if(_.contains(categories, boxValue))
+      return '';
+
     if (!lastWord) {
       return '';
     }
@@ -1853,19 +1861,6 @@ VS.model.SearchFacet = Backbone.Model.extend({
     var categorizeRemainder = this.get("app").options.categorizeRemainder;
 
     if (!value) return '';
-
-    // XXX: ugly hack and suboptimal solution. Using the keyboard to select a
-    // category with spaces in its name results in the creation of a default
-    // facet with the category's name as its value, so for now I'm just
-    // forbidding the user to search for a category name in the default facet.
-    //
-    var categories = this.get('app').options.callbacks.facetMatches(function(facets) {
-      return _.map(facets, function(facet) {
-        return facet.label || facet;
-      });
-    });
-    if(category === remainder && _.contains(categories, value))
-      return '';
 
     if (!_.contains(this.get("app").options.unquotable || [], category) &&
       (category != remainder || categorizeRemainder)) {
