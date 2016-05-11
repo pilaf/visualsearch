@@ -980,6 +980,16 @@ VS.ui.SearchFacet = Backbone.View.extend({
       this.options.app.searchBox.focusNextFacet(this, -1, {startAtEnd: -1});
       this.remove(e);
     } else if (key == 'backspace') {
+       $(document).on('keydown.backspace', function(e) {
+          if (VS.app.hotkeys.key(e) === 'backspace') {
+             e.preventDefault();
+          }
+       });
+
+       $(document).on('keyup.backspace', function(e) {
+          $(document).off('.backspace');
+       });
+
       if (this.modes.selected == 'is') {
         e.preventDefault();
         this.remove(e);
@@ -988,6 +998,7 @@ VS.ui.SearchFacet = Backbone.View.extend({
         e.preventDefault();
         this.selectFacet();
       }
+       e.stopPropagation();
     }
 
     // Handle paste events
@@ -1057,6 +1068,8 @@ VS.ui.SearchInput = Backbone.View.extend({
       autoFocus : true,
       position  : {offset : "0 -1"},
       source    : _.bind(this.autocompleteValues, this),
+      // Prevent changing the input value on focus of an option
+      focus     : function() { return false; },
       create    : _.bind(function(e, ui) {
         $(this.el).find('.ui-autocomplete-input').css('z-index','auto');
       }, this),
